@@ -2,6 +2,7 @@ import pygame
 import time
 
 pygame.init()
+pygame.mixer.pre_init(44100, 16, 2, 4096) #setting 16 bit size; 32 or 64 bit dosent work.
 pygame.mixer.init()
 win =  pygame.display.set_mode((500,480))
 
@@ -16,8 +17,6 @@ char = pygame.image.load('standing.png')
 #loading audio files
 t = pygame.mixer.music
 t.load('bullet.wav')
-#t.load('bgmusic.wav')
-#t.play(-1, 0.0)
 t.load('hit.wav')
 
 clock = pygame.time.Clock()
@@ -28,7 +27,7 @@ class player():
         self.y = y
         self.height = height
         self.width = width
-        self.vel = 10 #your man.vel is 10 but video man.vel in 5
+        self.vel = 10
         self.isJump = False
         self.jumpcount = 10
         self.left = False
@@ -53,11 +52,10 @@ class player():
                 win.blit(walkRight[0],(self.x,self.y))
             else:
                 win.blit(walkLeft[0],(self.x,self.y))
-        self.hitbox = (self.x + 17, self.y+ 11, 29, 52) #to make hitbox move with the player
+        self.hitbox = (self.x + 17, self.y+ 11, 29, 52)  #to make hitbox move with the player
         #pygame.draw.rect(win, (255,0,0), self.hitbox, 2)
 
     def hit(self):
-        print('kill')
         self.isJump = False #because if jumping man hits goblin, it continues its downward jump.
         self.jumpcount = 10
         self.x = 60
@@ -70,6 +68,7 @@ class player():
         win.blit(text,(250 - (text.get_width()/2), 240- (text.get_height()/2) ))
         pygame.display.update()
         time.sleep(2)
+
 
 class Projectile():
     def __init__(self, x, y, radius, color, facing):
@@ -94,7 +93,7 @@ class Enemy():
         self.width = width
         self.height = height
         self.end = end
-        self.path = [self.x,self.end] #problem lag raha h
+        self.path = [self.x,self.end]
         self.walkcount = 0
         self.vel = 3
         self.hitbox = (self.x + 17, self.y+2, 31, 57)
@@ -132,12 +131,12 @@ class Enemy():
                 self.walkcount = 0
 
     def hit(self):
-        print('hit')
         if self.health > 1:
             self.health -= 1
         else:
             self.visible = False
             walkcount = 0
+
 
 def redrawgamewindow():
     win.blit(bg, (0,0))
@@ -146,6 +145,8 @@ def redrawgamewindow():
     for bullet in bullets:
         bullet.draw(win)
     if goblin.visible:
+        global font
+        font = pygame.font.SysFont('corbel', 30, True)
         text = font.render('Score: ' + str(score),1 , (0,0,0))
         win.blit(text, (380,10))
     else:
@@ -153,18 +154,15 @@ def redrawgamewindow():
         win.blit(text3,(250 - (text3.get_width()/2), 240- (text3.get_height()/2)))
     pygame.display.update()
 
-
 #creating instances of characters
 man = player(300, 410, 64, 64)
 goblin = Enemy(50,410,64,64,450)
 
 bulletsound = pygame.mixer.Sound('bullet.wav')
 hitsound = pygame.mixer.Sound('hit.wav')
-#bgsouond = pygame.mixer.Sound('bgmusic.wav')
-#pygame.mixer.music.load('bgmusic.mp3')
-#bgsound.play(-1)
+bgsound = pygame.mixer.Sound('bgmusic (2).wav')
+bgsound.play(-1)
 
-font = pygame.font.SysFont('corbel', 30, True)
 score = 0
 shootcount = 0
 bullets = []
@@ -177,7 +175,7 @@ while run:
     else:
         shootcount =  0
 
-    for event in pygame.event.get(): #an entery in the list of events, get means get the entry.
+    for event in pygame.event.get(): #an entry in the list of events, get means get the entry.
         if event.type == pygame.QUIT:
             run = False
 
@@ -186,11 +184,12 @@ while run:
             bullet.x += bullet.vel*bullet.facing
         else:
             bullets.pop(bullets.index(bullet))
-        if pygame.Rect(goblin.hitbox).collidepoint(bullet.x, bullet.y):
-            goblin.hit()
-            score += 1
-            hitsound.play()
-            bullets.pop(bullets.index(bullet))
+        if goblin.visible:
+            if pygame.Rect(goblin.hitbox).collidepoint(bullet.x, bullet.y):
+                goblin.hit()
+                score += 1
+                hitsound.play()
+                bullets.pop(bullets.index(bullet))
 
     if goblin.visible:
         if pygame.Rect(goblin.hitbox).colliderect(man.hitbox):
@@ -231,12 +230,6 @@ while run:
             man.walkcount = 0
 
     else:
-        '''if man.jumpcount >= -10:
-            man.y -= (man.jumpcount**2)/2
-            man.jumpcount -= 1
-        if man.jumpcount in range(-10,0):
-            man.y -= -(man.jumpcount**2)/2
-            man.jumpcount -= 1'''
         if man.jumpcount >= -10:
             neg =1
             if man.jumpcount<0:
@@ -248,6 +241,5 @@ while run:
             man.jumpcount = 10
 
     redrawgamewindow()
-
 
 pygame.quit()
