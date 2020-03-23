@@ -16,7 +16,7 @@ char = pygame.image.load('standing.png')
 #loading audio files
 t = pygame.mixer.music
 t.load('bullet.wav')
-t.load('bgmusic.wav')
+#t.load('bgmusic.wav')
 #t.play(-1, 0.0)
 t.load('hit.wav')
 
@@ -160,9 +160,9 @@ goblin = Enemy(50,410,64,64,450)
 
 bulletsound = pygame.mixer.Sound('bullet.wav')
 hitsound = pygame.mixer.Sound('hit.wav')
-bgsouond = pygame.mixer.Sound('bgmusic.wav')
+#bgsouond = pygame.mixer.Sound('bgmusic.wav')
 #pygame.mixer.music.load('bgmusic.mp3')
-bgsound.play(-1)
+#bgsound.play(-1)
 
 font = pygame.font.SysFont('corbel', 30, True)
 score = 0
